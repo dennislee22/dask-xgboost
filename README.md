@@ -22,13 +22,22 @@ tewpg0qzx5gu0yhm   5/5     Running   0          3m59s   10.42.3.91    ecs-w-01.d
 ```
 ![dask-xgboost-5w](https://github.com/user-attachments/assets/e31e6444-1da4-4771-88ef-5156817e5b59)
 
-<img width="1461" alt="image" src="https://github.com/user-attachments/assets/3a4bf9ac-b9f4-41a9-8998-f381d880ec35" />
 
+```
+k8s_pods = 10
+dask_workers = workers.launch_workers(
+    n=k8s_pods,
+    cpu=1,
+    memory=8,
+    code=f"!dask-worker {scheduler_url}",
+)
+```
+<img width="800" height="748" alt="image" src="https://github.com/user-attachments/assets/bf99a3dc-ba26-4a14-85f9-c69b603988dc" />
 
 
 ```
 KilledWorker: Attempted to run task ('shuffle-transfer-d80b45ae0d76f301654c24d36b0796fc', 20) on 4 different workers, but all those workers died while running it....
 ```
-<img width="1445" alt="image" src="https://github.com/user-attachments/assets/78cf0201-7694-4a4c-adda-490f636b6606" />
+<img width="800" alt="image" src="https://github.com/user-attachments/assets/78cf0201-7694-4a4c-adda-490f636b6606" />
 
 

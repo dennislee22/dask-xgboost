@@ -84,6 +84,51 @@ Killed
 
 - Train XGboost model with Pandas (12G RAM)
 
+```
+cdsw@reqythscmmghof9g:~$ python train-xboost-pandas.py 
+
+Reading '3G_cdr_data.csv' with pandas...
+Performing feature engineering with pandas...
+
+Training the XGBoost model with pandas/scikit-learn...
+Calculating scale_pos_weight for class imbalance...
+/home/cdsw/train-xboost-pandas.py:58: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  scale_pos_weight = y_train.value_counts()[0] / y_train.value_counts()[1]
+scale_pos_weight determined to be: 19.00
+
+Model Evaluation on Test Set...
+Confusion Matrix:
+[[44646     4]
+ [    0  2350]]
+
+Classification Report:
+              precision    recall  f1-score   support
+
+       False       1.00      1.00      1.00     44650
+        True       1.00      1.00      1.00      2350
+
+    accuracy                           1.00     47000
+   macro avg       1.00      1.00      1.00     47000
+weighted avg       1.00      1.00      1.00     47000
+
+
+Feature Importances:
+mobility                195.0
+total_calls             115.0
+avg_duration            110.0
+outgoing_call_ratio      95.0
+nocturnal_call_ratio     51.0
+std_duration              3.0
+dtype: float64
+
+Trained XGBoost model saved to 'fraud_detection_model_xgb2.json'
+Process complete in 229.39 seconds.
+cdsw@reqythscmmghof9g:~$ 
+```
+
+<img width="1180" height="211" alt="image" src="https://github.com/user-attachments/assets/0cf5a50f-a489-4cb3-846c-91229ce9289e" />
+
+
 
 ## Best Practice
 

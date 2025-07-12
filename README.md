@@ -1,4 +1,4 @@
-# dask-xgboost
+# XGboost with Dask
 
 ```
 cdsw@df8gqpsco0hlse3g:~$ pip list | grep dask
@@ -34,6 +34,58 @@ dask_workers = workers.launch_workers(
 ```
 <img width="800" height="748" alt="image" src="https://github.com/user-attachments/assets/bf99a3dc-ba26-4a14-85f9-c69b603988dc" />
 
+
+- Train XGboost model with 10 Dask workers
+```
+Dask client connected: <Client: 'tcp://10.42.1.227:8786' processes=10 threads=320, memory=73.57 GiB>
+
+Reading '3G_cdr_data.csv' with Dask...
+Performing feature engineering with Dask...
+
+Training the XGBoost model with Dask...
+Calculating scale_pos_weight for class imbalance...
+scale_pos_weight: 18.96
+
+Model Evaluation on Test Set...
+[[45094     3]
+ [    0  2352]]
+              precision    recall  f1-score   support
+
+       False       1.00      1.00      1.00     45097
+        True       1.00      1.00      1.00      2352
+
+    accuracy                           1.00     47449
+   macro avg       1.00      1.00      1.00     47449
+weighted avg       1.00      1.00      1.00     47449
+
+
+Feature Importances:
+mobility                178.0
+total_calls             101.0
+avg_duration             96.0
+outgoing_call_ratio      83.0
+nocturnal_call_ratio     60.0
+std_duration              3.0
+dtype: float64
+
+Trained XGBoost model saved to 'fraud_detection_model_xgb.json'
+Process complete in 346.85 seconds.
+```
+
+- Train XGboost model with Pandas (8G RAM)
+```
+$ python train-xboost-pandas.py 
+
+Reading '3G_cdr_data.csv' with pandas...
+Killed
+```
+
+<img width="1182" height="217" alt="image" src="https://github.com/user-attachments/assets/ae627dff-0687-4445-ad95-1998957f96dd" />
+
+- Train XGboost model with Pandas (12G RAM)
+
+
+## Best Practice
 
 ```
 KilledWorker: Attempted to run task ('shuffle-transfer-d80b45ae0d76f301654c24d36b0796fc', 20) on 4 different workers, but all those workers died while running it....

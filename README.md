@@ -8,7 +8,7 @@
     1. [Create synthetic dataset](create-synthetic-cdr.py) (in batch to prevent running into OOM problem).
     2. Use dataframe to create feature engineering of the dataset ([dask-train-xgboost.ipynb](dask-train-xgboost.ipynb)).
     3. Train and test the model using XGBoost ([dask-train-xgboost.ipynb](dask-train-xgboost.ipynb)).
-    4. Use the trained model to make prediction on the new dataset.
+    4. [Perform inference with the trained model](model-inference.py) to make prediction on the new dataset.
 
 ## Test 1: Train XGboost model with larger-than-memory datasets
 - Train XGboost model with Pandas with 3GB of csv dataset using a node of 8G RAM.

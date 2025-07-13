@@ -1,14 +1,86 @@
-# XGboost with Dask
+# XGBoost with Dask vs Pandas
+
+- XGBoost (eXtreme Gradient Boosting) is a gradient boosting algorithm. It builds decision trees sequentially, with each new tree attempting to correct the errors of the previous ones. The XGBoost algorithm operates by iteratively adding weak learner decision trees to build a strong ensemble model.
+- Pandas Dataframe has widely been used for data manipulation and analysis in Python. It organizes data into 2-D arrays with rows and columns, similar to a SQL/tabular table.
+- XGBoost can be seamlessly integrated with Pandas for ML tasks. Pandas provides powerful tools for data manipulation and preprocessing, which can be applied to prepare data for XGBoost models.
+- Dask enables distributed computations, allowing you to scale your ML tasks across multiple pods/nodes/machines. It is equipped with Dask Dataframe (Pandas-like) with lazy execution in which it runs a computational graph of tasks rather than executing a particular task immediately.
+- This article examines how Dask is able to build XGBoost model with larger-than-memory datasets in a distributed Kubernetes platform, effectively addressing the limitations of using XGBoost solely with Pandas DataFrames. The use case is training a XGBoost model against 3GB of csv dataset. The model is used to help telco to check if a particular MSISDN/user is fradulent based on the captured CDR. The steps to achieve this use case include:
+    1. Create synthetic dataset (in batch to prevent running into OOM problem).
+    2. Use dataframe to create feature engineering of the dataset.
+    3. Train and test the model using XGBoost.
+    4. Use the trained model to make prediction on the new dataset.
+
+## Test 1: Train XGboost model with larger-than-memory datasets
+- Train XGboost model with Pandas with 3GB of csv dataset using a node of 8G RAM.
+```tel
+$ python train-xboost-pandas.py 
+
+Reading '3G_cdr_data.csv' with pandas...
+Killed
+```
+- The process is killed almost instantly because the dataset is too large to fit into the memory of a node.
+  
+<img width="1182" height="217" alt="image" src="https://github.com/user-attachments/assets/ae627dff-0687-4445-ad95-1998957f96dd" />
+
+- Train XGboost model with Pandas (12G RAM)
 
 ```
-cdsw@df8gqpsco0hlse3g:~$ pip list | grep dask
+$ python train-xboost-pandas.py 
+
+Reading '3G_cdr_data.csv' with pandas...
+Performing feature engineering with pandas...
+
+Training the XGBoost model with pandas/scikit-learn...
+Calculating scale_pos_weight for class imbalance...
+scale_pos_weight determined to be: 19.00
+
+Model Evaluation on Test Set...
+Confusion Matrix:
+[[44646     4]
+ [    0  2350]]
+
+Classification Report:
+              precision    recall  f1-score   support
+
+       False       1.00      1.00      1.00     44650
+        True       1.00      1.00      1.00      2350
+
+    accuracy                           1.00     47000
+   macro avg       1.00      1.00      1.00     47000
+weighted avg       1.00      1.00      1.00     47000
+
+
+Feature Importances:
+mobility                195.0
+total_calls             115.0
+avg_duration            110.0
+outgoing_call_ratio      95.0
+nocturnal_call_ratio     51.0
+std_duration              3.0
+dtype: float64
+
+Trained XGBoost model saved to 'fraud_detection_model_xgb2.json'
+Process complete in 229.39 seconds.
+cdsw@reqythscmmghof9g:~$ 
+```
+
+<img width="1180" height="211" alt="image" src="https://github.com/user-attachments/assets/0cf5a50f-a489-4cb3-846c-91229ce9289e" />
+
+## Train XGboost model in a distributed platform using Dask
+
+1. Dask will be able to complete the operation where Pandas would have failed.
+2. Ensure the associated libraries have been installed.
+```
+$ pip list | grep dask
 dask                               2025.5.1
 dask-glm                           0.3.2
 dask-ml                            2025.1.0
-cdsw@df8gqpsco0hlse3g:~$ pip list | grep xgboost
+
+$ pip list | grep xgboost
 xgboost                            3.0.2
 ```
 
+2. Create a cluster in K8s platform with 6 pods (1 Dask scheduler and 5 Dask workers). Check out 1st cell in [dask-train-xgboost.ipynb](dask-train-xgboost.ipynb) 
 ```
 # kubectl -n cmlws5-user-1  get pods -o wide
 NAME               READY   STATUS    RESTARTS   AGE     IP            NODE                          NOMINATED NODE   READINESS GATES
@@ -72,61 +144,7 @@ Trained XGBoost model saved to 'fraud_detection_model_xgb.json'
 Process complete in 346.85 seconds.
 ```
 
-- Train XGboost model with Pandas (8G RAM)
-```
-$ python train-xboost-pandas.py 
 
-Reading '3G_cdr_data.csv' with pandas...
-Killed
-```
-
-<img width="1182" height="217" alt="image" src="https://github.com/user-attachments/assets/ae627dff-0687-4445-ad95-1998957f96dd" />
-
-- Train XGboost model with Pandas (12G RAM)
-
-```
-cdsw@reqythscmmghof9g:~$ python train-xboost-pandas.py 
-
-Reading '3G_cdr_data.csv' with pandas...
-Performing feature engineering with pandas...
-
-Training the XGBoost model with pandas/scikit-learn...
-Calculating scale_pos_weight for class imbalance...
-/home/cdsw/train-xboost-pandas.py:58: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
-  scale_pos_weight = y_train.value_counts()[0] / y_train.value_counts()[1]
-scale_pos_weight determined to be: 19.00
-
-Model Evaluation on Test Set...
-Confusion Matrix:
-[[44646     4]
- [    0  2350]]
-
-Classification Report:
-              precision    recall  f1-score   support
-
-       False       1.00      1.00      1.00     44650
-        True       1.00      1.00      1.00      2350
-
-    accuracy                           1.00     47000
-   macro avg       1.00      1.00      1.00     47000
-weighted avg       1.00      1.00      1.00     47000
-
-
-Feature Importances:
-mobility                195.0
-total_calls             115.0
-avg_duration            110.0
-outgoing_call_ratio      95.0
-nocturnal_call_ratio     51.0
-std_duration              3.0
-dtype: float64
-
-Trained XGBoost model saved to 'fraud_detection_model_xgb2.json'
-Process complete in 229.39 seconds.
-cdsw@reqythscmmghof9g:~$ 
-```
-
-<img width="1180" height="211" alt="image" src="https://github.com/user-attachments/assets/0cf5a50f-a489-4cb3-846c-91229ce9289e" />
 
 
 

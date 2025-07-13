@@ -22,7 +22,7 @@ Killed
   
 <img width="1182" height="217" alt="image" src="https://github.com/user-attachments/assets/ae627dff-0687-4445-ad95-1998957f96dd" />
 
-- Train XGboost model with Pandas (12G RAM)
+- Train XGboost model with Pandas with 3GB of csv dataset using a node of 12G RAM. The script completes successfully with larger memory size.
 
 ```
 $ python train-xboost-pandas.py 
@@ -66,21 +66,19 @@ cdsw@reqythscmmghof9g:~$
 
 <img width="1180" height="211" alt="image" src="https://github.com/user-attachments/assets/0cf5a50f-a489-4cb3-846c-91229ce9289e" />
 
-## Train XGboost model in a distributed platform using Dask
+## Test 2: Train XGboost model in a distributed K8s platform using Dask (5 workers)
 
-1. Dask will be able to complete the operation where Pandas would have failed.
-2. Ensure the associated libraries have been installed.
+1. Ensure the associated libraries have been installed.
 ```
-$ pip list | grep dask
+$ pip list | egrep 'dask|bokeh|xgb'
+bokeh                              3.7.3
 dask                               2025.5.1
 dask-glm                           0.3.2
 dask-ml                            2025.1.0
-
-$ pip list | grep xgboost
 xgboost                            3.0.2
 ```
 
-2. Create a cluster in K8s platform with 6 pods (1 Dask scheduler and 5 Dask workers). Check out 1st cell in [dask-train-xgboost.ipynb](dask-train-xgboost.ipynb) 
+2. Create a cluster in K8s platform with 6 pods (1 Dask scheduler and 5 Dask workers). Each pod has 8GB RAM. Run the first cell in [dask-train-xgboost.ipynb](dask-train-xgboost.ipynb). 
 ```
 # kubectl -n cmlws5-user-1  get pods -o wide
 NAME               READY   STATUS    RESTARTS   AGE     IP            NODE                          NOMINATED NODE   READINESS GATES
@@ -92,9 +90,15 @@ m0ng1uix3eegqny7   5/5     Running   0          2m47s   10.42.3.93    ecs-w-01.d
 qufc1uc6wxx3x4qz   5/5     Running   0          2m47s   10.42.3.92    ecs-w-01.dlee5.cldr.example   <none>           <none>
 tewpg0qzx5gu0yhm   5/5     Running   0          3m59s   10.42.3.91    ecs-w-01.dlee5.cldr.example   <none>           <none>
 ```
+
+3. By running the second cell in [dask-train-xgboost.ipynb](dask-train-xgboost.ipynb), Python functions are handed over to Dask scheduler which distributes the tasks among the workers. 
 ![dask-xgboost-5w](https://github.com/user-attachments/assets/e31e6444-1da4-4771-88ef-5156817e5b59)
 
+4. The result shows the model has been trained successfully with 8G RAM in each worker. This demonstrates Dask distributes the dataset among workers, preventing OOM. However, the completion time is longer than previous test using Pandas dataframe because MSISDN is set as an index with high degree of cardinality. A shuffle is a computationally expensive process for rearranging data across partitions. Operations like merge (the equivalent of a SQL join), set_index on an unsorted column, and certain groupby aggregations trigger a shuffle. In a distributed environment with multiple nodes/pods, it involves sending significant amounts of data over the network.
 
+Test 3: Train XGboost model in a distributed K8s platform using Dask (10 workers)
+
+1. Run the first cell in [dask-train-xgboost.ipynb](dask-train-xgboost.ipynb) with the following modification. 
 ```
 k8s_pods = 10
 dask_workers = workers.launch_workers(
@@ -106,7 +110,7 @@ dask_workers = workers.launch_workers(
 ```
 <img width="800" height="748" alt="image" src="https://github.com/user-attachments/assets/bf99a3dc-ba26-4a14-85f9-c69b603988dc" />
 
-
+2. Run the second cell in [dask-train-xgboost.ipynb](dask-train-xgboost.ipynb). The result shows the completion time is faster than using Dask with 5 workers.
 - Train XGboost model with 10 Dask workers
 ```
 Dask client connected: <Client: 'tcp://10.42.1.227:8786' processes=10 threads=320, memory=73.57 GiB>

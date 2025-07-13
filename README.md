@@ -148,15 +148,47 @@ Trained XGBoost model saved to 'fraud_detection_model_xgb.json'
 Process complete in 346.85 seconds.
 ```
 
+## Model Inference
 
+- [Perform inference with the trained model](model-inference.py) to make prediction on the new dataset.
+```
+$ python model-inference.py new_cdr_data.csv
+Loading model from 'fraud_detection_model_xgb2.json'...
+Model loaded successfully.
 
+Reading inference data 'new_cdr_data.csv' with pandas...
+Performing feature engineering for inference with pandas...
 
+Performing inference with the loaded model...
 
-## Best Practice
+Saving predictions to 'predictions_new_cdr_data.csv'...
 
+--- Inference Summary ---
+Total MSISDNs processed: 50000
+Number of MSISDNs predicted as fraudulent: 2508
+
+Top 5 most likely fraudulent MSISDNs (by probability):
+            total_calls  outgoing_call_ratio  avg_duration  std_duration  nocturnal_call_ratio  mobility  fraud_probability  is_predicted_fraud
+msisdn                                                                                                                                         
+6590000004       1430.0             0.995105     15.046762      4.886439              0.904196       1.0           0.999999                   1
+6590033097        958.0             0.990605     15.181286      4.894379              0.907098       1.0           0.999999                   1
+6590032978        571.0             0.991243     14.848366      4.776497              0.910683       1.0           0.999999                   1
+6590032981       1306.0             0.992343     14.979778      5.012120              0.908882       1.0           0.999999                   1
+6590032990        700.0             0.985714     15.051479      4.611223              0.897143       1.0           0.999999                   1
+
+Reasoning: Predictions are based on the model learning from features such as:
+total_calls, outgoing_call_ratio, avg_duration, std_duration, nocturnal_call_ratio, and mobility.
+High fraud probability suggests these users' activity patterns resemble those of known fraud cases in the training data.
+--------------------------
+
+Inference process complete in 40.96 seconds.
+``` 
+
+## Tips
+- The following Dask dashboard depicts tasks have to rerun 4 times till it fail due to insufficient memory to complete the first batch of tasks.
+
+<img width="800" alt="image" src="https://github.com/user-attachments/assets/78cf0201-7694-4a4c-adda-490f636b6606" />
 ```
 KilledWorker: Attempted to run task ('shuffle-transfer-d80b45ae0d76f301654c24d36b0796fc', 20) on 4 different workers, but all those workers died while running it....
 ```
-<img width="800" alt="image" src="https://github.com/user-attachments/assets/78cf0201-7694-4a4c-adda-490f636b6606" />
-
 

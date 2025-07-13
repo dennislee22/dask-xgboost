@@ -1,5 +1,7 @@
 # XGBoost with Dask vs Pandas
 
+<img width="604" height="191" alt="image" src="https://github.com/user-attachments/assets/b7860da7-a9ed-402b-a9dd-6db5dd122cbd" />
+
 - XGBoost (eXtreme Gradient Boosting) is a gradient boosting algorithm. It builds decision trees sequentially, with each new tree attempting to correct the errors of the previous ones. The XGBoost algorithm operates by iteratively adding weak learner decision trees to build a strong ensemble model.
 - Pandas Dataframe has widely been used for data manipulation and analysis in Python. It organizes data into 2-D arrays with rows and columns, similar to a SQL/tabular table.
 - XGBoost can be seamlessly integrated with Pandas for ML tasks. Pandas provides powerful tools for data manipulation and preprocessing, which can be applied to prepare data for XGBoost models.
@@ -90,10 +92,11 @@ qufc1uc6wxx3x4qz   5/5     Running   0          2m47s   10.42.3.92    ecs-w-01.d
 tewpg0qzx5gu0yhm   5/5     Running   0          3m59s   10.42.3.91    ecs-w-01.dlee5.cldr.example   <none>           <none>
 ```
 
-3. By running the second cell in [dask-train-xgboost.ipynb](dask-train-xgboost.ipynb), Python functions are handed over to Dask scheduler which distributes the tasks among the workers. 
+3. By running the second cell in [dask-train-xgboost.ipynb](dask-train-xgboost.ipynb), Python functions are handed over to Dask scheduler which distributes the tasks among the workers.
+
 ![dask-xgboost-5w](https://github.com/user-attachments/assets/e31e6444-1da4-4771-88ef-5156817e5b59)
 
-4. The result shows the model has been trained successfully with 8G RAM in each worker. This demonstrates Dask distributes the dataset among workers, preventing OOM. However, the completion time is longer than previous test using Pandas dataframe because MSISDN is set as an index with high degree of cardinality. A shuffle is a computationally expensive process for rearranging data across partitions. Operations like merge (the equivalent of a SQL join), set_index on an unsorted column, and certain groupby aggregations trigger a shuffle. In a distributed environment with multiple nodes/pods, it involves sending significant amounts of data over the network.
+5. The result shows the model has been trained successfully with 8G RAM in each worker. This demonstrates Dask distributes the dataset among workers, preventing OOM. However, the completion time is longer than previous test using Pandas dataframe because MSISDN is set as an index with high degree of cardinality. A shuffle is a computationally expensive process for rearranging data across partitions. Operations like merge (the equivalent of a SQL join), set_index on an unsorted column, and certain groupby aggregations trigger a shuffle. In a distributed environment with multiple nodes/pods, it involves sending significant amounts of data over the network.
 
 Test 3: Train XGboost model in a distributed K8s platform using Dask (10 workers)
 
@@ -187,6 +190,7 @@ Inference process complete in 40.96 seconds.
 - The following Dask dashboard depicts tasks have to rerun 4 times till it fail due to insufficient memory to complete the first batch of tasks.
 
 <img width="800" alt="image" src="https://github.com/user-attachments/assets/78cf0201-7694-4a4c-adda-490f636b6606" />
+
 ```
 KilledWorker: Attempted to run task ('shuffle-transfer-d80b45ae0d76f301654c24d36b0796fc', 20) on 4 different workers, but all those workers died while running it....
 ```

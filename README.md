@@ -61,7 +61,6 @@ dtype: float64
 
 Trained XGBoost model saved to 'fraud_detection_model_xgb2.json'
 Process complete in 229.39 seconds.
-cdsw@reqythscmmghof9g:~$ 
 ```
 
 <img width="1180" height="211" alt="image" src="https://github.com/user-attachments/assets/0cf5a50f-a489-4cb3-846c-91229ce9289e" />

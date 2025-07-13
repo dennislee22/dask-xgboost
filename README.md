@@ -6,8 +6,8 @@
 - Dask enables distributed computations, allowing you to scale your ML tasks across multiple pods/nodes/machines. It is equipped with Dask Dataframe (Pandas-like) with lazy execution in which it runs a computational graph of tasks rather than executing a particular task immediately.
 - This article examines how Dask is able to build XGBoost model with larger-than-memory datasets in a distributed Kubernetes platform, effectively addressing the limitations of using XGBoost solely with Pandas DataFrames. The use case is training a XGBoost model against 3GB of csv dataset. The model is used to help telco to check if a particular MSISDN/user is fradulent based on the captured CDR. The steps to achieve this use case include:
     1. [Create synthetic dataset](create-synthetic-cdr.py) (in batch to prevent running into OOM problem).
-    2. Use dataframe to create feature engineering of the dataset. [dask-train-xgboost.ipynb](dask-train-xgboost.ipynb). 
-    3. Train and test the model using XGBoost. [dask-train-xgboost.ipynb](dask-train-xgboost.ipynb). 
+    2. Use dataframe to create feature engineering of the dataset ([dask-train-xgboost.ipynb](dask-train-xgboost.ipynb)).
+    3. Train and test the model using XGBoost ([dask-train-xgboost.ipynb](dask-train-xgboost.ipynb)).
     4. Use the trained model to make prediction on the new dataset.
 
 ## Test 1: Train XGboost model with larger-than-memory datasets

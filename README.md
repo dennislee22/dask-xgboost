@@ -13,18 +13,18 @@
     4. [Perform inference with the trained model](model-inference.py) to make prediction on the new dataset.
 
 ## Test 1: Train XGboost model with larger-than-memory datasets
-- Train XGboost model with Pandas with 3GB of csv dataset using a node of 8G RAM.
+- Train XGboost model with Pandas with 3GB of csv dataset using a node/pod equipped with 8G RAM.
 ```tel
 $ python train-xboost-pandas.py 
 
 Reading '3G_cdr_data.csv' with pandas...
 Killed
 ```
-- The process is killed almost instantly because the dataset is too large to fit into the memory of a node.
+- The process is killed almost instantly because the dataset is too large to fit into the memory of a node/pod.
   
 <img width="1182" height="217" alt="image" src="https://github.com/user-attachments/assets/ae627dff-0687-4445-ad95-1998957f96dd" />
 
-- Train XGboost model with Pandas with 3GB of csv dataset using a node of 12G RAM. The script completes successfully with larger memory size.
+- Train XGboost model with Pandas with 3GB of csv dataset using a node/pod with 12G RAM. The script completes successfully using a node/pod with larger memory size.
 
 ```
 $ python train-xboost-pandas.py 
@@ -79,7 +79,7 @@ dask-ml                            2025.1.0
 xgboost                            3.0.2
 ```
 
-2. Create a cluster in K8s platform with 6 pods (1 Dask scheduler and 5 Dask workers). Each pod has 8GB RAM. Run the first cell in [dask-train-xgboost.ipynb](dask-train-xgboost.ipynb). 
+2. Create a cluster in K8s platform with 6 pods (1 Dask scheduler and 5 Dask workers). Each pod has 8GB RAM. Run the first cell in [dask-train-xgboost.ipynb](dask-train-xgboost.ipynb). Unlike the bare-metal platform, the beauty of running Dask on a Kubernetes platform is the high-speed of spawning workers in the form of container pods, and return the resources back to the pool after the task(s) is completed.
 ```
 # kubectl -n cmlws5-user-1  get pods -o wide
 NAME               READY   STATUS    RESTARTS   AGE     IP            NODE                          NOMINATED NODE   READINESS GATES
@@ -96,7 +96,7 @@ tewpg0qzx5gu0yhm   5/5     Running   0          3m59s   10.42.3.91    ecs-w-01.d
 
 ![dask-xgboost-5w](https://github.com/user-attachments/assets/e31e6444-1da4-4771-88ef-5156817e5b59)
 
-5. The result shows the model has been trained successfully with 8G RAM in each worker. This demonstrates Dask distributes the dataset among workers, preventing OOM. However, the completion time is longer than previous test using Pandas dataframe because MSISDN is set as an index with high degree of cardinality. A shuffle is a computationally expensive process for rearranging data across partitions. Operations like merge (the equivalent of a SQL join), set_index on an unsorted column, and certain groupby aggregations trigger a shuffle. In a distributed environment with multiple nodes/pods, it involves sending significant amounts of data over the network.
+5. The result shows the model has been trained successfully with 8G RAM in each worker. This demonstrates Dask distributes the dataset among workers, preventing OOM error. However, the completion time is longer than previous test using Pandas dataframe because MSISDN is set as an index with high degree of cardinality. A shuffle is a computationally expensive process for rearranging data across partitions. Operations like merge (the equivalent of a SQL join), set_index on an unsorted column, and certain groupby aggregations trigger a shuffle. In a distributed environment with multiple nodes/pods, it involves sending significant amounts of data over the network.
 
 Test 3: Train XGboost model in a distributed K8s platform using Dask (10 workers)
 
@@ -170,7 +170,7 @@ Total MSISDNs processed: 50000
 Number of MSISDNs predicted as fraudulent: 2508
 
 Top 5 most likely fraudulent MSISDNs (by probability):
-            total_calls  outgoing_call_ratio  avg_duration  std_duration  nocturnal_call_ratio  mobility  fraud_probability  is_predicted_fraud
+            total_calls  outgoing_call_ratio  avg_duration  std_duration  nocturnal_call_ratio  mobility  fraud_probability is_predicted_fraud
 msisdn                                                                                                                                         
 6590000004       1430.0             0.995105     15.046762      4.886439              0.904196       1.0           0.999999                   1
 6590033097        958.0             0.990605     15.181286      4.894379              0.907098       1.0           0.999999                   1
@@ -186,12 +186,12 @@ High fraud probability suggests these users' activity patterns resemble those of
 Inference process complete in 40.96 seconds.
 ``` 
 
-## Tips
-- The following Dask dashboard depicts tasks have to rerun 4 times till it fail due to insufficient memory to complete the first batch of tasks.
+## Dask Tips
+- The following Dask dashboard depicts tasks have to rerun 4 times, yet still failed eventually due to the insufficient memory to complete the first batch of tasks. If the task is fundamentally too large for worker's memory, this cycle repeats until Dask exhausts its retry attempts, leading to the entire computation failing. The takeaway is letting a doomed computation run to completion wastes time and resources. By observing the task stream and memory usage on the dashboard, you can spot these failure loops early and intervene.
 
 <img width="800" alt="image" src="https://github.com/user-attachments/assets/78cf0201-7694-4a4c-adda-490f636b6606" />
 
-```
+`
 KilledWorker: Attempted to run task ('shuffle-transfer-d80b45ae0d76f301654c24d36b0796fc', 20) on 4 different workers, but all those workers died while running it....
-```
+`
 

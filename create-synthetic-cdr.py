@@ -42,7 +42,7 @@ def generate_batch_data(msisdn_batch: List[int], fraud_msisdns: set):
     return pd.DataFrame(batch_records)
 
 if __name__ == '__main__':
-    NUM_USERS = 235000
+    NUM_USERS = 200000
     FRAUD_PERCENTAGE = 0.05
     BATCH_SIZE = 500   # Process 500 users at a time to keep memory low
     OUTPUT_FILENAME = '3G_cdr_data.csv'

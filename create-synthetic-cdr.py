@@ -5,17 +5,6 @@ import time
 from typing import List
 
 def generate_batch_data(msisdn_batch: List[int], fraud_msisdns: set):
-    """
-    Generates a synthetic dataset for a single BATCH of users.
-    This keeps the list of records in memory small.
-
-    Args:
-        msisdn_batch (List[int]): A list of MSISDNs for the users in this batch.
-        fraud_msisdns (set): The complete set of fraudulent MSISDNs to check against.
-
-    Returns:
-        pandas.DataFrame: A DataFrame containing the CDR data for this batch of users.
-    """
     batch_records = []
     
     # Loop through only the users assigned to this batch

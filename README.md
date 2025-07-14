@@ -1,6 +1,6 @@
 # XGBoost with Dask vs Pandas
 
-<img width="604" height="191" alt="image" src="https://github.com/user-attachments/assets/b7860da7-a9ed-402b-a9dd-6db5dd122cbd" />
+<img width="744" height="218" alt="image" src="https://github.com/user-attachments/assets/071671dc-c383-4e39-90a6-4d614af4ddce" />
 
 - XGBoost (eXtreme Gradient Boosting) is a gradient boosting algorithm. It builds decision trees sequentially, with each new tree attempting to correct the errors of the previous ones. The XGBoost algorithm operates by iteratively adding weak learner decision trees to build a strong ensemble model.
 - Pandas Dataframe has widely been used for data manipulation and analysis in Python. It organizes data into 2-D arrays with rows and columns, similar to a SQL/tabular table.

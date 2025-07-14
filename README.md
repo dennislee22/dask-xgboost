@@ -96,7 +96,7 @@ tewpg0qzx5gu0yhm   5/5     Running   0          3m59s   10.42.3.91    ecs-w-01.d
 
 ![dask-xgboost-5w](https://github.com/user-attachments/assets/e31e6444-1da4-4771-88ef-5156817e5b59)
 
-5. The result shows the model has been trained successfully with 8G RAM in each worker. This demonstrates Dask distributes the dataset among workers, preventing OOM error. However, the completion time is longer than previous test using Pandas dataframe because MSISDN is set as an index with high degree of cardinality. A shuffle is a computationally expensive process for rearranging data across partitions. Operations like merge (the equivalent of a SQL join), set_index on an unsorted column, and certain groupby aggregations trigger a shuffle. In a distributed environment with multiple nodes/pods, it involves sending significant amounts of data over the network.
+5. The result shows the model has been trained successfully with 8G RAM in each worker. This demonstrates Dask distributes the dataset among workers, preventing OOM error. However, the completion time is longer than previous test using Pandas dataframe because MSISDN is set as an index with high degree of cardinality. A shuffle is a computationally expensive process for rearranging data across partitions. Operations like merge (the equivalent of a SQL join), set_index on an unsorted column, and certain groupby aggregations trigger a shuffle. In a distributed environment with multiple nodes/pods, inter-worker communication causes slowdown to a certain degree.
 
 Test 3: Train XGboost model in a distributed K8s platform using Dask (10 workers)
 
